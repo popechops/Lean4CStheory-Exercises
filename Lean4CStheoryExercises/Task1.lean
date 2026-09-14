@@ -172,7 +172,7 @@ def isBigTheta (f g : ℕ → ℝ) : Prop :=
   isBigO f g ∧ isBigOmega f g
 
 -- Example 1.2
-example : isBigO (fun n ↦ (2 : ℝ) * n + 4) (fun n ↦ n) := by
+example : isBigO (fun n ↦ (2 : ℝ) * n + 4) (fun n ↦ n) := by            --Prompt: Explain what is happening in the following lean proof, *image of example 1.2 included * given the following definition, *image of isBigO definition included *
   use 3, 4
   constructor
   · linarith
@@ -195,25 +195,31 @@ theorem exercise_1_3 : isBigO (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
 -- (1 point) Exercise 1.4
 @[exercise "1.4" 1]
 theorem exercise_1_4 : isBigOmega (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
-  use 1, 4
+  use 3, 0
   constructor
   . linarith
   intro n hn
   calc
-    (3 : ℝ) * n + 2 ≤ 3 * n + n := by linarith [hn]
-    _ = 5 * n := by ring
+    (3 : ℝ) * n ≤ 3 * n + 2 := by linarith [hn]
 
 
 -- (1 point) Exercise 1.5
 @[exercise "1.5" 1]
 theorem exercise_1_5 : isBigTheta (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
-  use 2, 4
+  constructor
+  use 4, 2
   constructor
   . linarith
   intro n hn
   calc
-    (3 : ℝ) * n + 2 ≥ 3 * n + n := by linarith [hn]
-    _ = 2 * n := by ring
+    (3 : ℝ) * n + 2 ≤ 3 * n + n := by linarith [hn]
+    _ = 4 * n := by ring
+  use 3, 0
+  constructor
+  . linarith
+  intro n hn
+  calc
+    (3 : ℝ) * n ≤ 3 * n + 2 := by linarith [hn]
 
 end asymptotics
 
