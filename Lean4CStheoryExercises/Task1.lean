@@ -83,7 +83,10 @@ example {a b : ℝ} (h1 : a = 3) (h2 : b = -1) : a + b = 2 :=
 -- (1 point) Exercise 0.1
 @[exercise "0.1" 1]
 theorem exercise_0_1 {a b : ℝ} (h1 : a = 3) (h2 : b = 4) : a + 2 * b = 11 :=
-  sorry
+  calc
+  a + 2 * b = 3 + 2 * b := by rw [h1]
+  _ = 3 + 2 * 4 := by rw [h2]
+  _ = 11 := by norm_num
 
 -- Example 0.2
 example {n : ℕ} (h1 : c = 1) : 2 * n + 10 ≥ c * 2 := by
@@ -93,7 +96,8 @@ example {n : ℕ} (h1 : c = 1) : 2 * n + 10 ≥ c * 2 := by
 -- (1 point) Exercise 0.2
 @[exercise "0.2" 1]
 theorem exercise_0_2 {n : ℕ} (h1 : c = 3) : 5 * n + 6 ≥ c := by
-  sorry
+  rw [h1]
+  simp
 
 -- Example 0.3
 example {n : ℕ} (h1 : c = 5) : 4 * n ≤ c * n := by
@@ -111,7 +115,11 @@ example {n : ℕ} (h1 : c = 5) : 4 * n ≤ c * n := by
 -- (1 point) Exercise 0.3
 @[exercise "0.3" 1]
 theorem exercise_0_3 {n : ℕ} (h1 : c = 2) : 4 * n + 3 ≥ c * (n + 1) := by
-  sorry
+  rw [h1]
+  calc
+    4 * n + 3 ≥ 2 * (n + 1) := by
+      have h : 0 ≤ n := Nat.zero_le n
+      linarith
 
 -- Example 0.4
 example {n : ℕ} (h1 : n ≥ 1) (h2 : c = 1) :
@@ -133,7 +141,10 @@ example {n : ℕ} (h1 : n ≥ 2) (h2 : c₁ = 1) (h3 : c₂ = 4) :
 @[exercise "0.4" 1]
 theorem exercise_0_4 {n : ℕ} (h1 : n ≥ 10) (h2 : c₁ = 1) (h3 : c₂ = 10) :
   c₁ * (2 * n + 1) ≤ 5 * n ∧ 5 * n ≤ c₂ * (2 * n + 1) := by
-  sorry
+  rw [h2, h3]
+  constructor
+  . linarith [h1]
+  . linarith [h1]
 
 end basics
 
@@ -152,13 +163,13 @@ def isBigO (f g : ℕ → ℝ) : Prop :=
 -- Define Big-Omega using the same style as Big-O.
 @[exercise "1.1" 1]
 def isBigOmega (f g : ℕ → ℝ) : Prop :=
-  sorry
+  ∃ (c n₀ : ℝ), 0 < c ∧ ∀ n : ℕ, n ≥ n₀ → f n ≥ c * g n
 
 -- (1 point) Exercise 1.2
 -- Define Big-Theta using Big-O and Big-Omega.
 @[exercise "1.2" 1]
 def isBigTheta (f g : ℕ → ℝ) : Prop :=
-  sorry
+  isBigO f g ∧ isBigOmega f g
 
 -- Example 1.2
 example : isBigO (fun n ↦ (2 : ℝ) * n + 4) (fun n ↦ n) := by
@@ -173,17 +184,36 @@ example : isBigO (fun n ↦ (2 : ℝ) * n + 4) (fun n ↦ n) := by
 -- (1 point) Exercise 1.3
 @[exercise "1.3" 1]
 theorem exercise_1_3 : isBigO (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
-  sorry
+  use 4, 2
+  constructor
+  . linarith
+  intro n hn
+  calc
+    (3 : ℝ) * n + 2 ≤ 3 * n + n := by linarith [hn]
+    _ = 4 * n := by ring
 
 -- (1 point) Exercise 1.4
 @[exercise "1.4" 1]
 theorem exercise_1_4 : isBigOmega (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
-  sorry
+  use 1, 4
+  constructor
+  . linarith
+  intro n hn
+  calc
+    (3 : ℝ) * n + 2 ≤ 3 * n + n := by linarith [hn]
+    _ = 5 * n := by ring
+
 
 -- (1 point) Exercise 1.5
 @[exercise "1.5" 1]
 theorem exercise_1_5 : isBigTheta (fun n ↦ (3 : ℝ) * n + 2) (fun n ↦ n) := by
-  sorry
+  use 2, 4
+  constructor
+  . linarith
+  intro n hn
+  calc
+    (3 : ℝ) * n + 2 ≥ 3 * n + n := by linarith [hn]
+    _ = 2 * n := by ring
 
 end asymptotics
 
@@ -216,16 +246,19 @@ def sumOdd : ℕ → ℕ
 theorem exercise_2_1 (n : ℕ) : sumOdd n = (n + 1) ^ 2 := by
   induction n with
   | zero =>
-      sorry
+      simp[sumOdd]
   | succ k IH =>
-      sorry
+      simp [sumOdd, IH]
+      ring
 
 -- (1 point) Exercise 2.2
 -- Define the Fibonacci function fib(n).
 -- Only the function definition is required.
 @[exercise "2.2" 1]
-def fib : ℕ → ℕ :=
-  sorry
+def fib : ℕ → ℕ
+  | 0 => 0
+  | 1 => 1
+  | n + 2 => fib n + fib (n + 1)
 
 end recursion
 
@@ -275,8 +308,8 @@ theorem exercise_3_1 : Road 1 2 := by
   right
   left
   constructor
-  · sorry
-  · sorry
+  · norm_num
+  · norm_num
 
 -- Example 3.2
 example : TwoHopWalk 0 2 := by
@@ -297,8 +330,16 @@ example : TwoHopWalk 0 2 := by
 theorem exercise_3_2 : TwoHopWalk 1 3 := by
   use 2
   constructor
-  · sorry
-  · sorry
+  · right
+    left
+    constructor
+    . norm_num
+    . norm_num
+  . right
+    right
+    constructor
+    . norm_num
+    . norm_num
 
 end graph_basics
 
@@ -331,7 +372,7 @@ example : DifferentColors 0 1 := by
 -- (1 point) Exercise 4.1
 @[exercise "4.1" 1]
 theorem exercise_4_1 : DifferentColors 1 2 := by
-  sorry
+  norm_num [DifferentColors, Color]
 
 -- Example 4.2
 example : Road 0 1 ∧ DifferentColors 0 1 := by
@@ -346,8 +387,10 @@ example : Road 0 1 ∧ DifferentColors 0 1 := by
 @[exercise "4.2" 1]
 theorem exercise_4_2 : Road 1 2 ∧ DifferentColors 1 2 := by
   constructor
-  · sorry
-  · sorry
+  · right
+    constructor
+    . norm_num
+  . norm_num [DifferentColors, Color]
 
 end bipartite
 
@@ -379,7 +422,7 @@ example : InBfsLayer 1 1 := by
 -- (1 point) Exercise 5.1
 @[exercise "5.1" 1]
 theorem exercise_5_1 : InBfsLayer 3 2 := by
-  sorry
+  norm_num [InBfsLayer, BfsLevel]
 
 -- Example 5.2
 example : InBfsLayer 1 1 ∧ InBfsLayer 2 1 := by
@@ -391,8 +434,8 @@ example : InBfsLayer 1 1 ∧ InBfsLayer 2 1 := by
 @[exercise "5.2" 1]
 theorem exercise_5_2 : InBfsLayer 0 0 ∧ InBfsLayer 3 2 := by
   constructor
-  · sorry
-  · sorry
+  · norm_num [InBfsLayer, BfsLevel]
+  · norm_num [InBfsLayer, BfsLevel]
 
 -- Example 5.3
 example : Road 0 1 ∧ InBfsLayer 1 1 := by
@@ -407,8 +450,10 @@ example : Road 0 1 ∧ InBfsLayer 1 1 := by
 @[exercise "5.3" 1]
 theorem exercise_5_3 : Road 1 2 ∧ InBfsLayer 2 1 := by
   constructor
-  · sorry
-  · sorry
+  · right
+    constructor
+    . norm_num
+  . norm_num [InBfsLayer, BfsLevel]
 
 end bfs
 
@@ -447,7 +492,7 @@ example : IsDfsChild 0 1 := by
 -- (1 point) Exercise 6.1
 @[exercise "6.1" 1]
 theorem exercise_6_1 : IsDfsChild 1 2 := by
-  sorry
+  norm_num [IsDfsChild, DfsParent]
 
 -- Example 6.2
 example : DfsTime 0 < DfsTime 1 := by
@@ -456,7 +501,7 @@ example : DfsTime 0 < DfsTime 1 := by
 -- (1 point) Exercise 6.2
 @[exercise "6.2" 1]
 theorem exercise_6_2 : DfsTime 1 < DfsTime 3 := by
-  sorry
+  norm_num [DfsTime]
 
 -- Example 6.3
 example : DfsTime 0 < DfsTime 2 := by
@@ -470,9 +515,9 @@ example : DfsTime 0 < DfsTime 2 := by
 @[exercise "6.3" 1]
 theorem exercise_6_3 : DfsTime 0 < DfsTime 3 := by
   have h01 : DfsTime 0 < DfsTime 1 := by
-    sorry
+    norm_num [DfsTime]
   have h13 : DfsTime 1 < DfsTime 3 := by
-    sorry
+    norm_num [DfsTime]
   exact Nat.lt_trans h01 h13
 
 end dfs
